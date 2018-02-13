@@ -4,9 +4,9 @@ config:
     - duration: 240
       arrivalRate: 10
       name: "Warm up the application"
-    - duration: 60
-      arrivalRate: 30
-      name: "Sustained max load"
+    # - duration: 60
+    #   arrivalRate: 30
+    #   name: "Sustained max load"
   payload:
     - path: "users_test.csv"
       fields:
