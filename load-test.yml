@@ -1,0 +1,52 @@
+config:
+  target: "http://ec2-52-53-179-235.us-west-1.compute.amazonaws.com:4000"
+  phases:
+    - duration: 240
+      arrivalRate: 10
+      name: "Warm up the application"
+    - duration: 60
+      arrivalRate: 30
+      name: "Sustained max load"
+  payload:
+    - path: "users_test.csv"
+      fields:
+        - "user"
+    - path: "plays_test_aws.csv"
+      fields:
+        - "play"
+    - path: "chunks_test.csv"
+      fields: 
+        - "chunk"
+      order: "sequence"
+    - path: "content_test.csv"
+      fields: 
+        - "content"
+  processor: "./artillery_functions.js"
+scenarios:
+  - name: "Netflix user-flow"
+    flow:
+      # - loop:
+      #   - get:
+      #       url: "/unfinished?userId={{user}}"
+      #   count: 100
+      - post:
+          url: "/plays"
+          json:
+            userId: "{{user}}"
+            contentId: "{{content}}"
+          capture:
+            json: "$.nextchunk"
+            as: "nextChunk"
+      - loop:
+        - get:
+            url: "/chunks/{{nextChunk}}?playId={{play}}"
+            beforeRequest: "increaseNextChunk"
+            # capture:
+            #   json: "$.chunk.nextchunk"
+            #   as: "nextChunk"
+        # - think: 10
+        count: 100
+      # - patch:
+      #     url: "/plays"
+      #     json:
+      #       playId: "{{play}}"
